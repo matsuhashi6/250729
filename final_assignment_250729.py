@@ -49,6 +49,7 @@ import requests
 from bs4 import BeautifulSoup
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import matplotlib.pyplot as plt
 
 import plotly.io as pio
 pio.renderers.default = "iframe"
@@ -303,11 +304,7 @@ You just need to invoke the make_graph function with the required parameter to p
 </details>
 """
 
-tesla_revenue['Revenue'] = tesla_revenue['Revenue'].str.replace('$', '', regex=False)
-tesla_revenue['Revenue'] = tesla_revenue['Revenue'].str.replace(',', '', regex=False)
-tesla_revenue['Revenue'] = tesla_revenue['Revenue'].astype(float)
-
-make_graph(tesla_data, tesla_revenue, 'Tesla')
+make_graph(tesla_data, tesla_revenue, 'Tesla Stock Price and Revenue Over Time')
 
 """## Question 6: Plot GameStop Stock Graph
 
@@ -324,7 +321,7 @@ You just need to invoke the make_graph function with the required parameter to p
 </details>
 """
 
-make_graph(gme_data, gme_revenue, 'GameStop')
+make_graph(gme_data, gme_revenue, 'GameStop Stock Price and Revenue Over Time')
 
 """<h2>About the Authors:</h2>
 
@@ -346,52 +343,3 @@ Azim Hirjani
 
 <p>
 """
-
-soup = BeautifulSoup(html_data, "html.parser")
-
-# Read the table into a list of dataframes
-tables = pd.read_html(html_data)
-
-# The relevant table is at index 1
-tesla_revenue = tables[1]
-
-# Rename the columns to 'Date' and 'Revenue'
-tesla_revenue.columns = ['Date', 'Revenue']
-
-# Display the first few rows of the dataframe
-print(tesla_revenue.head())
-
-tesla_revenue["Revenue"] = tesla_revenue['Revenue'].str.replace(',|\$',"",regex=True)
-
-tesla_revenue.dropna(inplace=True)
-
-tesla_revenue = tesla_revenue[tesla_revenue['Revenue'] != ""]
-
-print(tesla_revenue.tail())
-
-gme_data = gme.history(period="max")
-
-gme_data.reset_index(inplace=True)
-print(gme_data.head())
-
-url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0220EN-SkillsNetwork/labs/project/stock.html"
-html_data_2 = requests.get(url).text
-
-soup = BeautifulSoup(html_data_2, "html.parser")
-
-import pandas as pd
-
-gme_revenue = pd.DataFrame(columns=["Date", "Revenue"])
-
-table_body = soup.find_all("tbody")[1]
-
-for row in table_body.find_all("tr"):
-    cols = row.find_all("td")
-    date = cols[0].text.strip()
-    revenue = cols[1].text.strip().replace(',', '').replace('$', '')
-
-    gme_revenue = pd.concat([gme_revenue, pd.DataFrame({"Date": [date], "Revenue": [revenue]})], ignore_index=True)
-
-print(gme_revenue.head())
-
-print(gme_revenue.tail())
